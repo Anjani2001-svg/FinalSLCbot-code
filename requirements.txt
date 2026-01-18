@@ -1,1 +1,9 @@
 python-dotenv
+streamlit
+pandas
+langchain-openai
+langchain-community
+faiss-cpu
+python-dotenv
+openpyxl
+langchain-classic
