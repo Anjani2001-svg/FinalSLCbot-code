@@ -3,6 +3,16 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 
+
+# Check if a question was sent from Make.com
+if "question" in st.query_params:
+    user_query = st.query_params["question"]
+    
+    # YOUR BOT LOGIC HERE
+    # result = my_ai_bot(user_query)
+    
+    st.write(f"Weekend Bot Response: {user_query}")
+
 # Import LangChain components
 import streamlit as st
 import pandas as pd
