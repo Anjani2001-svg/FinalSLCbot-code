@@ -1,10 +1,9 @@
-streamlit
+streamlit>=1.35.0
 pandas
 openpyxl
 xlrd
 python-dotenv
-langchain
+langchain>=1.0.0
 langchain-openai
 langchain-community
 faiss-cpu
-openai
