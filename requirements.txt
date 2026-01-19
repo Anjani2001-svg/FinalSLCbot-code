@@ -1,9 +1,10 @@
-python-dotenv
 streamlit
 pandas
+openpyxl
+xlrd
+python-dotenv
+langchain
 langchain-openai
 langchain-community
 faiss-cpu
-python-dotenv
-openpyxl
-langchain-classic
+openai
