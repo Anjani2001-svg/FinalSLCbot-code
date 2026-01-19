@@ -6,16 +6,12 @@ from db_setup import build_db
 from chatbot_core import set_db, generate_reply
 
 app = FastAPI()
-
 BREVO_API_KEY = os.environ["BREVO_API_KEY"]
-
 
 @app.on_event("startup")
 def startup():
-    # Build your vector DB once when the API starts
     db = build_db()
     set_db(db)
-
 
 @app.post("/brevo-webhook")
 async def brevo_webhook(req: Request):
@@ -37,7 +33,6 @@ async def brevo_webhook(req: Request):
     if not text:
         return {"ok": True}
 
-    # ✅ RAG answer
     answer = generate_reply(text)
 
     headers = {"api-key": BREVO_API_KEY, "content-type": "application/json"}
@@ -50,4 +45,3 @@ async def brevo_webhook(req: Request):
         timeout=15,
     )
     return {"ok": r.ok, "status": r.status_code}
-
