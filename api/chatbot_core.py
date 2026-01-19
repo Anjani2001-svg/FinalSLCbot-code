@@ -7,27 +7,27 @@ from langchain.chains.retrieval import create_retrieval_chain
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# You must provide this from your vector DB setup (Chroma/FAISS/Pinecone/etc.)
-db = None
+_db = None  # will be injected on startup
 
-def set_db(vector_db):
-    """Call this once at startup to inject your vector DB object."""
-    global db
-    db = vector_db
+
+def set_db(db):
+    global _db
+    _db = db
+
 
 def generate_reply(user_text: str) -> str:
-    if not db or not OPENAI_API_KEY:
+    if not _db or not OPENAI_API_KEY:
         return "System Error: Missing Database or API Key."
 
     llm = ChatOpenAI(
-        model="gpt-4o-mini",
+        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         temperature=0,
-        api_key=OPENAI_API_KEY,  # some versions use api_key instead of openai_api_key
+        api_key=OPENAI_API_KEY,
     )
 
     system_prompt = (
         "You are an assistant for South London College. "
-        "Use the following pieces of retrieved context to answer the user's question. "
+        "Use the retrieved context to answer the user's question. "
         "If you don't know the answer, say you don't know. Keep it professional.\n\n"
         "Context: {context}"
     )
@@ -38,8 +38,9 @@ def generate_reply(user_text: str) -> str:
     ])
 
     question_answer_chain = create_stuff_documents_chain(llm, prompt)
-    rag_chain = create_retrieval_chain(db.as_retriever(), question_answer_chain)
+    rag_chain = create_retrieval_chain(_db.as_retriever(), question_answer_chain)
 
     result = rag_chain.invoke({"input": user_text})
     return result.get("answer", "I couldn't generate an answer.")
+
 
