@@ -1,5 +1,45 @@
+import os
+
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.retrieval import create_retrieval_chain
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# You must provide this from your vector DB setup (Chroma/FAISS/Pinecone/etc.)
+db = None
+
+def set_db(vector_db):
+    """Call this once at startup to inject your vector DB object."""
+    global db
+    db = vector_db
 
 def generate_reply(user_text: str) -> str:
-    # TODO: paste the same logic your Streamlit uses to generate the reply
-    # Example placeholder:
-    return f"You said: {user_text}"
+    if not db or not OPENAI_API_KEY:
+        return "System Error: Missing Database or API Key."
+
+    llm = ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0,
+        api_key=OPENAI_API_KEY,  # some versions use api_key instead of openai_api_key
+    )
+
+    system_prompt = (
+        "You are an assistant for South London College. "
+        "Use the following pieces of retrieved context to answer the user's question. "
+        "If you don't know the answer, say you don't know. Keep it professional.\n\n"
+        "Context: {context}"
+    )
+
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", "{input}"),
+    ])
+
+    question_answer_chain = create_stuff_documents_chain(llm, prompt)
+    rag_chain = create_retrieval_chain(db.as_retriever(), question_answer_chain)
+
+    result = rag_chain.invoke({"input": user_text})
+    return result.get("answer", "I couldn't generate an answer.")
+
