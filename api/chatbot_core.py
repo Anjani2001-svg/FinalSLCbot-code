@@ -1,28 +1,22 @@
 import os
-
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-_db = None  # will be injected on startup
-
+_db = None
 
 def set_db(db):
     global _db
     _db = db
 
-
 def generate_reply(user_text: str) -> str:
-    if not _db or not OPENAI_API_KEY:
-        return "System Error: Missing Database or API Key."
+    if not _db:
+        return "System Error: Missing Database."
 
     llm = ChatOpenAI(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         temperature=0,
-        api_key=OPENAI_API_KEY,
     )
 
     system_prompt = (
@@ -42,5 +36,6 @@ def generate_reply(user_text: str) -> str:
 
     result = rag_chain.invoke({"input": user_text})
     return result.get("answer", "I couldn't generate an answer.")
+
 
 
