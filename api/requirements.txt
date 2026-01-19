@@ -1,7 +1,10 @@
 fastapi
 uvicorn[standard]
 requests
+pandas
+xlrd
 
 langchain
 langchain-openai
 langchain-community
+
